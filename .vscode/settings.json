@@ -20,8 +20,9 @@
         "task.h": "c",
         "freertos.h": "c",
         "bme680.h": "c",
-        "i2cdev.h": "c"
+        "i2cdev.h": "c",
+        "esp_wifi.h": "c"
     },
-    "idf.flashType": "JTAG",
+    "idf.flashType": "UART",
     "idf.portWin": "COM5"
 }
