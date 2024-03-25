@@ -40,7 +40,11 @@
 
 #define SSID "TP-Link_918C"
 #define PASS "16522060"
+// Global variables
 
+volatile float temperature;
+volatile float humidity;
+volatile float pressure;
 void bme680_test(void *pvParameters)
 {
     bme680_t sensor;
@@ -79,7 +83,9 @@ void bme680_test(void *pvParameters)
         {
             // passive waiting until measurement results are available
             vTaskDelay(duration);
-
+            temperature = values.temperature;
+            humidity = values.humidity;
+            pressure = values.pressure;
             // get the results and do something with them
             if (bme680_get_results_float(&sensor, &values) == ESP_OK)
                 printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
@@ -92,10 +98,11 @@ void bme680_test(void *pvParameters)
 #define PORT_UDP 48569
 #define HOST_IP_ADDR "192.168.1.106"
 static const char *TAG = "UDP SOCKET CLIENT";
-static const char *payload = "Message from ESP32 UDP Client";
+static const char *payload = "BME680 Sensor";
 
 static void udp_client_task(void *pvParameters)
-{
+{   
+    char buffer[128];
     char rx_buffer[128];
     char host_ip[] = HOST_IP_ADDR;
     int addr_family = 0;
@@ -125,7 +132,9 @@ static void udp_client_task(void *pvParameters)
 
         while (1) {
 
-            int err = sendto(sock, payload, strlen(payload), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+            const char *payload_format = "BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n";
+            snprintf(buffer, sizeof(buffer), payload_format, temperature, humidity, pressure);
+            int err = sendto(sock, buffer, strlen(buffer), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
             if (err < 0) {
                 ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
                 break;

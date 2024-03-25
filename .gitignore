@@ -1,0 +1,13 @@
+build/.bin_timestamp
+build/.ninja_deps
+build/.ninja_log
+build/solve.bin
+build/solve.elf
+build/solve.map
+build/bootloader/.ninja_log
+build/esp-idf/esp_app_format/libesp_app_format.a
+build/esp-idf/esp_app_format/CMakeFiles/__idf_esp_app_format.dir/esp_app_desc.c.obj
+build/esp-idf/main/libmain.a
+build/esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+build/log/idf_py_stderr_output_10224
+build/log/idf_py_stdout_output_10224
