@@ -427,3 +427,8 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("D:/Users/waelk/solve/build/esp-idf/bme680/cmake_install.cmake")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("D:/Users/waelk/solve/build/esp-idf/nimblr/cmake_install.cmake")
+endif()
+

@@ -20,8 +20,16 @@
         "task.h": "c",
         "freertos.h": "c",
         "bme680.h": "c",
-        "i2cdev.h": "c"
+        "i2cdev.h": "c",
+        "ble_hs.h": "c",
+        "ble_svc_gap.h": "c",
+        "nimble_port.h": "c",
+        "nimble_port_freertos.h": "c",
+        "esp_log.h": "c",
+        "nvs_flash.h": "c",
+        "esp_nimble_hci.h": "c",
+        "esp_event.h": "c"
     },
-    "idf.flashType": "JTAG",
+    "idf.flashType": "UART",
     "idf.portWin": "COM5"
 }

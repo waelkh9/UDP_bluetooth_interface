@@ -391,6 +391,7 @@ D:/Users/waelk/solve/build/esp-idf/esp_wifi/CMakeFiles/list_install_components.d
 D:/Users/waelk/solve/build/esp-idf/esp_wifi/CMakeFiles/install.dir
 D:/Users/waelk/solve/build/esp-idf/esp_wifi/CMakeFiles/install/local.dir
 D:/Users/waelk/solve/build/esp-idf/esp_wifi/CMakeFiles/install/strip.dir
+D:/Users/waelk/solve/build/esp-idf/bt/CMakeFiles/__idf_bt.dir
 D:/Users/waelk/solve/build/esp-idf/bt/CMakeFiles/edit_cache.dir
 D:/Users/waelk/solve/build/esp-idf/bt/CMakeFiles/rebuild_cache.dir
 D:/Users/waelk/solve/build/esp-idf/bt/CMakeFiles/list_install_components.dir
@@ -649,3 +650,9 @@ D:/Users/waelk/solve/build/esp-idf/bme680/CMakeFiles/list_install_components.dir
 D:/Users/waelk/solve/build/esp-idf/bme680/CMakeFiles/install.dir
 D:/Users/waelk/solve/build/esp-idf/bme680/CMakeFiles/install/local.dir
 D:/Users/waelk/solve/build/esp-idf/bme680/CMakeFiles/install/strip.dir
+D:/Users/waelk/solve/build/esp-idf/nimblr/CMakeFiles/edit_cache.dir
+D:/Users/waelk/solve/build/esp-idf/nimblr/CMakeFiles/rebuild_cache.dir
+D:/Users/waelk/solve/build/esp-idf/nimblr/CMakeFiles/list_install_components.dir
+D:/Users/waelk/solve/build/esp-idf/nimblr/CMakeFiles/install.dir
+D:/Users/waelk/solve/build/esp-idf/nimblr/CMakeFiles/install/local.dir
+D:/Users/waelk/solve/build/esp-idf/nimblr/CMakeFiles/install/strip.dir
