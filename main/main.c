@@ -38,14 +38,14 @@
 #include "freertos/queue.h"
 
 
-#define SSID "TP-Link_918C"
-#define PASS "16522060"
+#define SSID "Redmi Note 10"
+#define PASS "123456007"
 // Global variables
 
 volatile float temperature;
 volatile float humidity;
 volatile float pressure;
-void bme680_test(void *pvParameters)
+void bme680_test()
 {
     bme680_t sensor;
     memset(&sensor, 0, sizeof(bme680_t));
@@ -96,7 +96,7 @@ void bme680_test(void *pvParameters)
     }
 }
 #define PORT_UDP 48569
-#define HOST_IP_ADDR "192.168.1.106"
+#define HOST_IP_ADDR "131.246.35.22"
 static const char *TAG = "UDP SOCKET CLIENT";
 static const char *payload = "BME680 Sensor";
 
@@ -217,7 +217,7 @@ void app_main(void)
 {
     wifi_connection();
     ESP_ERROR_CHECK(i2cdev_init());
-    xTaskCreatePinnedToCore(bme680_test, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
+    bme680_test();
     vTaskDelay(5000 / portTICK_PERIOD_MS);
     xTaskCreate(udp_client_task, "udp_client", 4096, NULL, 5, NULL);
 }
