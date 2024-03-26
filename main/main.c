@@ -26,6 +26,10 @@
 #include "services/gap/ble_svc_gap.h"
 #include "services/gatt/ble_svc_gatt.h"
 #include "sdkconfig.h"
+// Global variables
+volatile float temperature;
+volatile float humidity;
+volatile float pressure;
 
 char *TAG = "BLE-Server";
 uint8_t ble_addr_type;
@@ -34,17 +38,30 @@ void ble_app_advertise(void);
 // Write data to ESP32 defined as server
 static int device_write(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
+    char * data = (char *)ctxt->om->om_data;
     printf("Data from the client: %.*s\n", ctxt->om->om_len, ctxt->om->om_data);
     return 0;
 }
 
 // Read data from ESP32 defined as server
 static int device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
-{
-    os_mbuf_append(ctxt->om, "Data from the server", strlen("Data from the server"));
+{       char payload_temperature[100];
+        const char *payload_format = "temp %.2f °C";
+        snprintf(payload_temperature, sizeof(payload_temperature), payload_format, temperature);
+
+        os_mbuf_append(ctxt->om, payload_temperature, strlen("Data from the server"));
+        
     return 0;
 }
+static int device_read2(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
+{       char payload_humidity[100];
+        const char *payload_format_humidity = "Humidity  %.2f %%";
+        snprintf(payload_humidity, sizeof(payload_humidity), payload_format_humidity, humidity);
 
+        os_mbuf_append(ctxt->om, payload_humidity, strlen("Data from the server"));
+        
+    return 0;
+}
 // Array of pointers to other service definitions
 // UUID - Universal Unique Identifier
 static const struct ble_gatt_svc_def gatt_svcs[] = {
@@ -55,8 +72,8 @@ static const struct ble_gatt_svc_def gatt_svcs[] = {
           .flags = BLE_GATT_CHR_F_READ,
           .access_cb = device_read},
          {.uuid = BLE_UUID16_DECLARE(0xDEAD),           // Define UUID for writing
-          .flags = BLE_GATT_CHR_F_WRITE,
-          .access_cb = device_write},
+          .flags = BLE_GATT_CHR_F_READ,
+          .access_cb = device_read2},
          {0}}},
     {0}};
 
@@ -113,13 +130,13 @@ void ble_app_on_sync(void)
 }
 
 // The infinite task
-void host_task(void *param)
+void host_task()
 {
     nimble_port_run(); // This function will return only when nimble_port_stop() is executed
 }
 
 
-void bme680_test(void *pvParameters)
+void bme680_test()
 {
     bme680_t sensor;
     memset(&sensor, 0, sizeof(bme680_t));
@@ -160,11 +177,15 @@ void bme680_test(void *pvParameters)
 
             // get the results and do something with them
             if (bme680_get_results_float(&sensor, &values) == ESP_OK)
+            temperature = values.temperature;
+            humidity = values.humidity;
+            pressure = values.pressure;
                 printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
                         values.temperature, values.humidity, values.pressure, values.gas_resistance);
         }
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
+
     }
 }
 
@@ -179,6 +200,7 @@ void app_main()
     ble_gatts_add_svcs(gatt_svcs);             // 4 - Initialize NimBLE configuration - queues gatt services.
     ble_hs_cfg.sync_cb = ble_app_on_sync;      // 5 - Initialize application
     nimble_port_freertos_init(host_task);  
-    //ESP_ERROR_CHECK(i2cdev_init());
-    //xTaskCreatePinnedToCore(bme680_test, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);    // 6 - Run the thread
+    ESP_ERROR_CHECK(i2cdev_init());
+    
+    xTaskCreatePinnedToCore(bme680_test, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);    // 6 - Run the thread
 }
