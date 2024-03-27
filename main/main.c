@@ -38,8 +38,8 @@
 #include "freertos/queue.h"
 
 
-#define SSID "Redmi Note 10"
-#define PASS "123456007"
+#define SSID "TP-Link_918C"
+#define PASS "16522060"
 // Global variables
 
 volatile float temperature;
@@ -76,8 +76,8 @@ void bme680_test()
     TickType_t last_wakeup = xTaskGetTickCount();
 
     bme680_values_float_t values;
-    while (1)
-    {
+    //while (1)
+    
         // trigger the sensor to start one TPHG measurement cycle
         if (bme680_force_measurement(&sensor) == ESP_OK)
         {
@@ -88,19 +88,23 @@ void bme680_test()
             pressure = values.pressure;
             // get the results and do something with them
             if (bme680_get_results_float(&sensor, &values) == ESP_OK)
-                printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
+                printf("temperature: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
                         values.temperature, values.humidity, values.pressure, values.gas_resistance);
+
+            temperature = values.temperature;
+            humidity = values.humidity;
+            pressure = values.pressure;
         }
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
-    }
+    
 }
 #define PORT_UDP 48569
-#define HOST_IP_ADDR "131.246.35.22"
+#define HOST_IP_ADDR "192.168.1.106"
 static const char *TAG = "UDP SOCKET CLIENT";
 static const char *payload = "BME680 Sensor";
 
-static void udp_client_task(void *pvParameters)
+static void udp_client_task()
 {   
     char buffer[128];
     char rx_buffer[128];
@@ -108,7 +112,7 @@ static void udp_client_task(void *pvParameters)
     int addr_family = 0;
     int ip_protocol = 0;
 
-    while (1) {
+    
         struct sockaddr_in dest_addr;
         dest_addr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);
         dest_addr.sin_family = AF_INET;
@@ -119,7 +123,10 @@ static void udp_client_task(void *pvParameters)
         int sock = socket(addr_family, SOCK_DGRAM, ip_protocol);
         if (sock < 0) {
             ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
-            break;
+            return;
+        
+
+        
         }
 
         // Set timeout
@@ -130,17 +137,22 @@ static void udp_client_task(void *pvParameters)
 
         ESP_LOGI(TAG, "Socket created, sending to %s:%d", host_ip, PORT_UDP);
 
-        while (1) {
-
-            const char *payload_format = "BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n";
-            snprintf(buffer, sizeof(buffer), payload_format, temperature, humidity, pressure);
+        
+            while(1){
+            bme680_test();
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+            const char *payload_format = "temperature= %.2f°C humidity=%.2f %%";
+            snprintf(buffer, sizeof(buffer), payload_format, temperature, humidity);
             int err = sendto(sock, buffer, strlen(buffer), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
             if (err < 0) {
                 ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-                break;
-            }
+                
+            } else {
             ESP_LOGI(TAG, "Message sent");
-
+            }
+            
+        
+            }
             struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
             socklen_t socklen = sizeof(source_addr);
             int len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
@@ -148,7 +160,7 @@ static void udp_client_task(void *pvParameters)
             // Error occurred during receiving
             if (len < 0) {
                 ESP_LOGE(TAG, "recvfrom failed: errno %d", errno);
-                break;
+                
             }
             // Data received
             else {
@@ -157,21 +169,21 @@ static void udp_client_task(void *pvParameters)
                 ESP_LOGI(TAG, "%s", rx_buffer);
                 if (strncmp(rx_buffer, "OK: ", 4) == 0) {
                     ESP_LOGI(TAG, "Received expected message, reconnecting");
-                    break;
+                    
                 }
             }
             vTaskDelay(5000 / portTICK_PERIOD_MS);
-        }
+        
 
         if (sock != -1) {
             ESP_LOGE(TAG, "Shutting down socket and restarting...");
             shutdown(sock, 0);
             close(sock);
         }
-    }
+    
     vTaskDelete(NULL);
-}
 
+}
 static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
     switch (event_id)
@@ -214,10 +226,13 @@ void wifi_connection()
 }
 
 void app_main(void)
-{
+{   
+
     wifi_connection();
+    vTaskDelay(5000 / portTICK_PERIOD_MS);    
     ESP_ERROR_CHECK(i2cdev_init());
-    bme680_test();
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
-    xTaskCreate(udp_client_task, "udp_client", 4096, NULL, 5, NULL);
+    udp_client_task();
+    
+    //xTaskCreate(udp_client_task, "udp_client", 4096, NULL, 5, NULL);
+    
 }
