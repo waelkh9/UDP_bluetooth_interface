@@ -227,11 +227,11 @@ void wifi_connection()
 
 void app_main(void)
 {   
-
+    
     wifi_connection();
     vTaskDelay(5000 / portTICK_PERIOD_MS);    
     ESP_ERROR_CHECK(i2cdev_init());
-    udp_client_task();
+    xTaskCreate(udp_client_task, "udp_send", 2048,NULL, 1, NULL);
     
     //xTaskCreate(udp_client_task, "udp_client", 4096, NULL, 5, NULL);
     
