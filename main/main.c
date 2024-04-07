@@ -45,7 +45,7 @@
 volatile float temperature;
 volatile float humidity;
 volatile float pressure;
-void bme680_test()
+void bme680_test(void * pvParameters)
 {
     bme680_t sensor;
     memset(&sensor, 0, sizeof(bme680_t));
@@ -76,7 +76,7 @@ void bme680_test()
     TickType_t last_wakeup = xTaskGetTickCount();
 
     bme680_values_float_t values;
-    //while (1)
+    while (1){
     
         // trigger the sensor to start one TPHG measurement cycle
         if (bme680_force_measurement(&sensor) == ESP_OK)
@@ -94,9 +94,12 @@ void bme680_test()
             temperature = values.temperature;
             humidity = values.humidity;
             pressure = values.pressure;
+            vTaskDelay(1000);
+        }
         }
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
+        vTaskDelete(NULL);
     
 }
 #define PORT_UDP 48569
@@ -104,7 +107,7 @@ void bme680_test()
 static const char *TAG = "UDP SOCKET CLIENT";
 static const char *payload = "BME680 Sensor";
 
-static void udp_client_task()
+static void udp_client_task(void * pvParameters)
 {   
     char buffer[128];
     char rx_buffer[128];
@@ -138,9 +141,9 @@ static void udp_client_task()
         ESP_LOGI(TAG, "Socket created, sending to %s:%d", host_ip, PORT_UDP);
 
         
-            while(1){
-            bme680_test();
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
+            
+            
+            while(1) {
             const char *payload_format = "temperature= %.2f°C humidity=%.2f %%";
             snprintf(buffer, sizeof(buffer), payload_format, temperature, humidity);
             int err = sendto(sock, buffer, strlen(buffer), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
@@ -149,10 +152,11 @@ static void udp_client_task()
                 
             } else {
             ESP_LOGI(TAG, "Message sent");
+            vTaskDelay(1000);
             }
             
-        
             }
+            
             struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
             socklen_t socklen = sizeof(source_addr);
             int len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
@@ -231,8 +235,13 @@ void app_main(void)
     wifi_connection();
     vTaskDelay(5000 / portTICK_PERIOD_MS);    
     ESP_ERROR_CHECK(i2cdev_init());
-    xTaskCreate(udp_client_task, "udp_send", 2048,NULL, 1, NULL);
     
-    //xTaskCreate(udp_client_task, "udp_client", 4096, NULL, 5, NULL);
+    xTaskCreate(bme680_test, "udp_send", 2048,NULL, 2, NULL);
+    vTaskDelay(1000);
+    
+
+    xTaskCreate(udp_client_task, "udp_send", 4096,NULL, 1, NULL);
+    
+   
     
 }
