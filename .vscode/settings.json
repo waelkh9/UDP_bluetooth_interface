@@ -24,5 +24,5 @@
         "esp_wifi.h": "c"
     },
     "idf.flashType": "UART",
-    "idf.portWin": "COM5"
+    "idf.portWin": "COM4"
 }

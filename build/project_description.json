@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "solve",
-    "project_version":    "1",
+    "project_version":    "4ffb58e-dirty",
     "project_path":       "D:/Users/waelk/solve",
     "idf_path":           "D:/Users/waelk/v5.2.1/esp-idf",
     "build_dir":          "D:/Users/waelk/solve/build",
