@@ -68,10 +68,10 @@ static const struct ble_gatt_svc_def gatt_svcs[] = {
     {.type = BLE_GATT_SVC_TYPE_PRIMARY,
      .uuid = BLE_UUID16_DECLARE(0x180),                 // Define UUID for device type
      .characteristics = (struct ble_gatt_chr_def[]){
-         {.uuid = BLE_UUID16_DECLARE(0xFEF4),           // Define UUID for reading
+         {.uuid = BLE_UUID16_DECLARE(0xDEAD),           // Define UUID for reading
           .flags = BLE_GATT_CHR_F_READ,
           .access_cb = device_read},
-         {.uuid = BLE_UUID16_DECLARE(0xDEAD),           // Define UUID for writing
+         {.uuid = BLE_UUID16_DECLARE(0xFEF4),           // Define UUID for writing
           .flags = BLE_GATT_CHR_F_READ,
           .access_cb = device_read2},
          {0}}},
@@ -185,6 +185,8 @@ void bme680_test()
         }
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
+        vTaskDelay(1000);
+
 
     }
 }
