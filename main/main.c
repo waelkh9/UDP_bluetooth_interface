@@ -136,7 +136,7 @@ void host_task()
 }
 
 
-void bme680_test()
+void bme680_read_data()
 {
     bme680_t sensor;
     memset(&sensor, 0, sizeof(bme680_t));
@@ -204,5 +204,5 @@ void app_main()
     nimble_port_freertos_init(host_task);  
     ESP_ERROR_CHECK(i2cdev_init());
     
-    xTaskCreatePinnedToCore(bme680_test, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);    // 6 - Run the thread
+    xTaskCreatePinnedToCore(bme680_read_data, "bme680_test", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);    // 6 - Run the thread
 }
