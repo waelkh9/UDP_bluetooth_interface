@@ -40,11 +40,16 @@
 
 #define SSID "TP-Link_918C"
 #define PASS "16522060"
-// Global variables
+#define PORT_UDP 48569
+#define HOST_IP_ADDR "192.168.1.106"
+static const char *TAG = "UDP SOCKET CLIENT";
+static const char *payload = "BME680 Sensor";
+// Global variables that holds the sensor data values
 
 volatile float temperature;
 volatile float humidity;
 volatile float pressure;
+
 void bme680_test(void * pvParameters)
 {
     bme680_t sensor;
@@ -102,25 +107,22 @@ void bme680_test(void * pvParameters)
         vTaskDelete(NULL);
     
 }
-#define PORT_UDP 48569
-#define HOST_IP_ADDR "192.168.1.106"
-static const char *TAG = "UDP SOCKET CLIENT";
-static const char *payload = "BME680 Sensor";
+
 
 static void udp_client_task(void * pvParameters)
 {   
-    char buffer[128];
-    char rx_buffer[128];
+    char buffer[128]; /*buffer to store the data to be sent*/
+    char rx_buffer[128]; /*buffer to store the received data*/
     char host_ip[] = HOST_IP_ADDR;
     int addr_family = 0;
     int ip_protocol = 0;
 
     
         struct sockaddr_in dest_addr;
-        dest_addr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);
-        dest_addr.sin_family = AF_INET;
-        dest_addr.sin_port = htons(PORT_UDP);
-        addr_family = AF_INET;
+        dest_addr.sin_addr.s_addr = inet_addr(HOST_IP_ADDR);/* destination addr*/
+        dest_addr.sin_family = AF_INET; /*IPv4 address(AF_INET)*/
+        dest_addr.sin_port = htons(PORT_UDP);/* Port used for the UDP transmission*/
+        addr_family = AF_INET; 
         ip_protocol = IPPROTO_IP;
 
         int sock = socket(addr_family, SOCK_DGRAM, ip_protocol);
@@ -140,8 +142,7 @@ static void udp_client_task(void * pvParameters)
 
         ESP_LOGI(TAG, "Socket created, sending to %s:%d", host_ip, PORT_UDP);
 
-        
-            
+                  
             
             while(1) {
             const char *payload_format = "temperature= %.2f°C humidity=%.2f %%";

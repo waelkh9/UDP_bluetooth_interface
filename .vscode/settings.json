@@ -21,7 +21,8 @@
         "freertos.h": "c",
         "bme680.h": "c",
         "i2cdev.h": "c",
-        "esp_wifi.h": "c"
+        "esp_wifi.h": "c",
+        "functional": "c"
     },
     "idf.flashType": "UART",
     "idf.portWin": "COM4"
