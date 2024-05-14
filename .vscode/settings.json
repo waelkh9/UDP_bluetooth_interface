@@ -22,8 +22,10 @@
         "bme680.h": "c",
         "i2cdev.h": "c",
         "esp_wifi.h": "c",
-        "functional": "c"
+        "functional": "c",
+        "bh1750_i2c_hal.h": "c",
+        "bh1750_i2c.h": "c"
     },
     "idf.flashType": "UART",
-    "idf.portWin": "COM4"
+    "idf.portWin": "COM9"
 }

@@ -5,11 +5,15 @@
 #include <bme680.h>
 #include <string.h>
 
+#include <bh1750_i2c_hal.h>
+#include <bh1750_i2c.h>
+
 #define BME680_I2C_ADDR 0x77
 #define PORT 0
 #define CONFIG_EXAMPLE_I2C_MASTER_SDA 21
 #define CONFIG_EXAMPLE_I2C_MASTER_SCL 22
-
+#define CONFIG_I2C_MASTER_SCL 19
+#define CONFIG_I2C_MASTER_SDA 18
 #ifndef APP_CPU_NUM
 #define APP_CPU_NUM PRO_CPU_NUM
 #endif
@@ -49,6 +53,7 @@ static const char *payload = "BME680 Sensor";
 volatile float temperature;
 volatile float humidity;
 volatile float pressure;
+volatile float lux;
 
 void bme680_test(void * pvParameters)
 {
@@ -145,8 +150,8 @@ static void udp_client_task(void * pvParameters)
                   
             
             while(1) {
-            const char *payload_format = "temperature= %.2f°C humidity=%.2f %%";
-            snprintf(buffer, sizeof(buffer), payload_format, temperature, humidity);
+            const char *payload_format = "temperature= %.2f°C humidity=%.2f %%, lux=%.2f";
+            snprintf(buffer, sizeof(buffer), payload_format, temperature, humidity, lux);
             int err = sendto(sock, buffer, strlen(buffer), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
             if (err < 0) {
                 ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
@@ -209,6 +214,56 @@ static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_b
         break;
     }
 }
+void bht1750()
+{
+    bh1750_dev_t dev_1;
+    esp_err_t err;
+
+    bh1750_i2c_hal_init();
+
+    /* Device init */
+    dev_1.i2c_addr = I2C_ADDRESS_BH1750;
+    dev_1.mtreg_val = DEFAULT_MEAS_TIME_REG_VAL;
+
+    /* Perform device reset */
+    err = bh1750_i2c_dev_reset(dev_1); 
+    ESP_LOGI(TAG, "Device reset: %s", err == BH1750_OK ? "Successful" : "Failed");
+
+    err += bh1750_i2c_set_power_mode(dev_1, BH1750_POWER_ON);
+    ESP_LOGI(TAG, "Changing power mode to ON: %s", err == BH1750_OK ? "Successful" : "Failed");
+
+    /* Change measurement time with  50% optical window transmission rate */
+    err += bh1750_i2c_set_mtreg_val(&dev_1, 50);
+    ESP_LOGI(TAG, "Changing measurement time: %s", err == BH1750_OK ? "Successful" : "Failed");
+
+    /* Configure device */
+    err += bh1750_i2c_set_resolution_mode(&dev_1, BH1750_CONT_H_RES_MODE);
+    if (err == BH1750_OK)
+    {
+        ESP_LOGI(TAG, "BH1750 config successful");
+    }
+    else{
+        ESP_LOGE(TAG, "BH1750 config failed!");
+    }
+    /* End of device config */
+
+    if (err == BH1750_OK)
+    {
+        ESP_LOGI(TAG, "BH1750 initialization successful");
+        //Start reading data
+        uint16_t data_light;
+        while(1)
+        {
+            bh1750_i2c_read_data(dev_1, &data_light);
+            ESP_LOGI(TAG, "Light Intensity: %d Lux", data_light);
+            lux = data_light;
+            vTaskDelay(1000);
+        }
+    }
+    else{
+        ESP_LOGE(TAG, "BH1750 initialization failed!");
+    }
+}
 
 void wifi_connection()
 {
@@ -237,10 +292,10 @@ void app_main(void)
     vTaskDelay(5000 / portTICK_PERIOD_MS);    
     ESP_ERROR_CHECK(i2cdev_init());
     
-    xTaskCreate(bme680_test, "udp_send", 2048,NULL, 2, NULL);
+    //xTaskCreate(bme680_test, "udp_send", 2048,NULL, 2, NULL);
+    //vTaskDelay(1000);
+    xTaskCreate(bht1750, "bht1750", 4096,NULL, 1, NULL);
     vTaskDelay(1000);
-    
-
     xTaskCreate(udp_client_task, "udp_send", 4096,NULL, 1, NULL);
     
    
