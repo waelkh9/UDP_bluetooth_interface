@@ -64,4 +64,5 @@ D:/Users/waelk/solve/build/esp-idf/spiffs/libspiffs.a
 D:/Users/waelk/solve/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 D:/Users/waelk/solve/build/esp-idf/main/libmain.a
 D:/Users/waelk/solve/build/esp-idf/i2cdev/libi2cdev.a
+D:/Users/waelk/solve/build/esp-idf/bht1750/libbht1750.a
 D:/Users/waelk/solve/build/esp-idf/bme680/libbme680.a

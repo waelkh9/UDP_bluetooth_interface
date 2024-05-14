@@ -28,8 +28,19 @@
         "esp_log.h": "c",
         "nvs_flash.h": "c",
         "esp_nimble_hci.h": "c",
-        "esp_event.h": "c"
+        "esp_event.h": "c",
+        "bh1750_i2c.h": "c",
+        "bh1750_i2c_hal.h": "c",
+        "i2c.h": "c",
+        "i2c_types.h": "c",
+        "soc_caps.h": "c",
+        "gpio.h": "c",
+        "semphr.h": "c",
+        "queue.h": "c",
+        "sdkconfig.h": "c",
+        "ble_svc_gatt.h": "c",
+        "portmacro.h": "c"
     },
     "idf.flashType": "UART",
-    "idf.portWin": "COM4"
+    "idf.portWin": "COM9"
 }

@@ -643,6 +643,13 @@ D:/Users/waelk/solve/build/esp-idf/i2cdev/CMakeFiles/list_install_components.dir
 D:/Users/waelk/solve/build/esp-idf/i2cdev/CMakeFiles/install.dir
 D:/Users/waelk/solve/build/esp-idf/i2cdev/CMakeFiles/install/local.dir
 D:/Users/waelk/solve/build/esp-idf/i2cdev/CMakeFiles/install/strip.dir
+D:/Users/waelk/solve/build/esp-idf/bht1750/CMakeFiles/__idf_bht1750.dir
+D:/Users/waelk/solve/build/esp-idf/bht1750/CMakeFiles/edit_cache.dir
+D:/Users/waelk/solve/build/esp-idf/bht1750/CMakeFiles/rebuild_cache.dir
+D:/Users/waelk/solve/build/esp-idf/bht1750/CMakeFiles/list_install_components.dir
+D:/Users/waelk/solve/build/esp-idf/bht1750/CMakeFiles/install.dir
+D:/Users/waelk/solve/build/esp-idf/bht1750/CMakeFiles/install/local.dir
+D:/Users/waelk/solve/build/esp-idf/bht1750/CMakeFiles/install/strip.dir
 D:/Users/waelk/solve/build/esp-idf/bme680/CMakeFiles/__idf_bme680.dir
 D:/Users/waelk/solve/build/esp-idf/bme680/CMakeFiles/edit_cache.dir
 D:/Users/waelk/solve/build/esp-idf/bme680/CMakeFiles/rebuild_cache.dir
