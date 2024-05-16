@@ -43,7 +43,7 @@
 
 
 #define SSID "TP-Link_918C"
-#define PASS "16522060"
+#define PASS "123456007"
 #define PORT_UDP 48569
 #define HOST_IP_ADDR "192.168.1.106"
 static const char *TAG = "UDP SOCKET CLIENT";
@@ -86,7 +86,7 @@ void bme680_test(void * pvParameters)
     TickType_t last_wakeup = xTaskGetTickCount();
 
     bme680_values_float_t values;
-    while (1){
+    
     
         // trigger the sensor to start one TPHG measurement cycle
         if (bme680_force_measurement(&sensor) == ESP_OK)
@@ -106,10 +106,12 @@ void bme680_test(void * pvParameters)
             pressure = values.pressure;
             vTaskDelay(1000);
         }
-        }
+        
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
         vTaskDelete(NULL);
+        i2c_driver_delete(0);
+       
     
 }
 
@@ -149,7 +151,7 @@ static void udp_client_task(void * pvParameters)
 
                   
             
-            while(1) {
+            
             const char *payload_format = "temperature= %.2f°C humidity=%.2f %%, lux=%.2f";
             snprintf(buffer, sizeof(buffer), payload_format, temperature, humidity, lux);
             int err = sendto(sock, buffer, strlen(buffer), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
@@ -161,7 +163,7 @@ static void udp_client_task(void * pvParameters)
             vTaskDelay(1000);
             }
             
-            }
+            
             
             struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
             socklen_t socklen = sizeof(source_addr);
@@ -216,6 +218,7 @@ static void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_b
 }
 void bht1750()
 {
+    int x=0;
     bh1750_dev_t dev_1;
     esp_err_t err;
 
@@ -252,17 +255,21 @@ void bht1750()
         ESP_LOGI(TAG, "BH1750 initialization successful");
         //Start reading data
         uint16_t data_light;
-        while(1)
-        {
+        while(x <3){
+        
             bh1750_i2c_read_data(dev_1, &data_light);
             ESP_LOGI(TAG, "Light Intensity: %d Lux", data_light);
             lux = data_light;
-            vTaskDelay(1000);
-        }
+            x+=1;
+        } 
+        
     }
     else{
         ESP_LOGE(TAG, "BH1750 initialization failed!");
     }
+    vTaskDelete(NULL);
+    i2c_driver_delete(0);
+    
 }
 
 void wifi_connection()
@@ -291,13 +298,16 @@ void app_main(void)
     wifi_connection();
     vTaskDelay(5000 / portTICK_PERIOD_MS);    
     ESP_ERROR_CHECK(i2cdev_init());
-    
-    //xTaskCreate(bme680_test, "udp_send", 2048,NULL, 2, NULL);
-    //vTaskDelay(1000);
-    xTaskCreate(bht1750, "bht1750", 4096,NULL, 1, NULL);
+    while(1){
+    i2c_driver_delete(0);
+    ESP_ERROR_CHECK(i2cdev_init());
+    xTaskCreate(bme680_test, "bme680_read", 4096,NULL, 1, NULL);
     vTaskDelay(1000);
+    xTaskCreate(bht1750, "bht1750", 2048,NULL, 2, NULL);
+    vTaskDelay(500);
     xTaskCreate(udp_client_task, "udp_send", 4096,NULL, 1, NULL);
-    
-   
+    vTaskDelay(500);
+
+    }
     
 }
