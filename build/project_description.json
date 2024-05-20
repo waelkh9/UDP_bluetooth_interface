@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "solve",
-    "project_version":    "fd75f74-dirty",
+    "project_version":    "1d018f5-dirty",
     "project_path":       "D:/Users/waelk/solve",
     "idf_path":           "D:/Users/waelk/v5.2.1/esp-idf",
     "build_dir":          "D:/Users/waelk/solve/build",
@@ -11,7 +11,7 @@
     "app_elf":            "solve.elf",
     "app_bin":            "solve.bin",
     "build_type":         "flash_app",
-    "git_revision":       "v5.2.1",
+    "git_revision":       "v5.2.1-dirty",
     "target":             "esp32c6",
     "rev":                "",
     "min_rev":            "0",

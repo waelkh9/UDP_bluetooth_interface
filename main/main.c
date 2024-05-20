@@ -60,6 +60,16 @@ static int device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gat
         
     return 0;
 }
+static int device_read3(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
+{       char payload_lux[100];
+        const char *payload_format_lux = "lux   %.2f %%";
+        snprintf(payload_lux, sizeof(payload_lux), payload_format_lux, lux);
+
+        os_mbuf_append(ctxt->om, payload_lux, strlen("Data from the server"));
+        
+    return 0;
+    
+}
 static int device_read2(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {       char payload_humidity[100];
         const char *payload_format_humidity = "Humidity  %.2f %%";
@@ -68,7 +78,6 @@ static int device_read2(uint16_t con_handle, uint16_t attr_handle, struct ble_ga
         os_mbuf_append(ctxt->om, payload_humidity, strlen("Data from the server"));
         
     return 0;
-    
 }
 // Array of pointers to other service definitions
 // UUID - Universal Unique Identifier
@@ -82,6 +91,9 @@ static const struct ble_gatt_svc_def gatt_svcs[] = {
          {.uuid = BLE_UUID16_DECLARE(0xFEF4),           // Define UUID for writing
           .flags = BLE_GATT_CHR_F_READ,
           .access_cb = device_read2},
+          {.uuid = BLE_UUID16_DECLARE(0xFEF4),           // Define UUID for writing
+          .flags = BLE_GATT_CHR_F_READ,
+          .access_cb = device_read3},
          {0}}},
     {0}};
 
@@ -194,6 +206,7 @@ void bme680_read_data()
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
         vTaskDelay(1000);
+        vTaskDelete(NULL);
 
 
     }
@@ -205,7 +218,7 @@ void bht1750()
 {
     bh1750_dev_t dev_1;
     esp_err_t err;
-
+    int x=0;
     bh1750_i2c_hal_init();
 
     /* Device init */
@@ -239,17 +252,20 @@ void bht1750()
         ESP_LOGI(TAG, "BH1750 initialization successful");
         //Start reading data
         uint16_t data_light;
-        while(1)
-        {
+        
+            while(x<3){
             bh1750_i2c_read_data(dev_1, &data_light);
             ESP_LOGI(TAG, "Light Intensity: %d Lux", data_light);
             lux = data_light;
+            
+            x+=1;
             vTaskDelay(1000);
-        }
+            }
     }
-    else{
+    else{ 
         ESP_LOGE(TAG, "BH1750 initialization failed!");
     }
+    vTaskDelete(NULL);
 }
 
 void app_main()
@@ -262,10 +278,17 @@ void app_main()
     ble_gatts_count_cfg(gatt_svcs);            // 4 - Initialize NimBLE configuration - config gatt services
     ble_gatts_add_svcs(gatt_svcs);             // 4 - Initialize NimBLE configuration - queues gatt services.
     ble_hs_cfg.sync_cb = ble_app_on_sync;      // 5 - Initialize application
-    nimble_port_freertos_init(host_task);  
+    nimble_port_freertos_init(host_task);
+    while (1) {
+    i2c_driver_delete(0);
     ESP_ERROR_CHECK(i2cdev_init());
-    
-    xTaskCreatePinnedToCore(bht1750, "bme680", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);
-    xTaskCreatePinnedToCore(bht1750, "bme680", configMINIMAL_STACK_SIZE * 8, NULL, 5, NULL, APP_CPU_NUM);    // 6 - Run the thread
+     xTaskCreate(bme680_read_data, "bme680", 4096, NULL, 1,NULL);   // 6 - Run the thread
+    vTaskDelay(1000);
+    //i2c_driver_delete(0);
+    //ESP_ERROR_CHECK(i2cdev_init());
+
+    xTaskCreate(bht1750, "bme680", 4096, NULL, 1, NULL);
     // 6 - Run the thread
+    }
+    
 }
