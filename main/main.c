@@ -45,7 +45,7 @@
 #define SSID "TP-Link_918C"
 #define PASS "123456007"
 #define PORT_UDP 48569
-#define HOST_IP_ADDR "192.168.1.106"
+#define HOST_IP_ADDR "192.168.1.102"
 static const char *TAG = "UDP SOCKET CLIENT";
 static const char *payload = "BME680 Sensor";
 // Global variables that holds the sensor data values
