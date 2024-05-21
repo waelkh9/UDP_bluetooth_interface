@@ -57,8 +57,8 @@ int16_t bh1750_i2c_hal_init()
         .mode = I2C_MODE_MASTER,
         .sda_io_num = 18,
         .scl_io_num = 19,
-        .sda_pullup_en = GPIO_PULLUP_ENABLE,    //Disable this if I2C lines have pull up resistor in place
-        .scl_pullup_en = GPIO_PULLUP_ENABLE,    //Disable this if I2C lines have pull up resistor in place
+        .sda_pullup_en = GPIO_PULLUP_DISABLE,    //Disable this if I2C lines have pull up resistor in place
+        .scl_pullup_en = GPIO_PULLUP_DISABLE,    //Disable this if I2C lines have pull up resistor in place
         .master.clk_speed = I2C_MASTER_FREQ_HZ,
     };
 

@@ -36,7 +36,6 @@ volatile float humidity;
 volatile float pressure;
 volatile float lux;
 
-#define I2C_ADDRESS_BH1750 0x23
 
 char *TAG = "BLE-Server";
 uint8_t ble_addr_type;
@@ -62,7 +61,7 @@ static int device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gat
 }
 static int device_read3(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {       char payload_lux[100];
-        const char *payload_format_lux = "lux   %.2f %%";
+        const char *payload_format_lux = "lux   %.2f ";
         snprintf(payload_lux, sizeof(payload_lux), payload_format_lux, lux);
 
         os_mbuf_append(ctxt->om, payload_lux, strlen("Data from the server"));
@@ -91,7 +90,7 @@ static const struct ble_gatt_svc_def gatt_svcs[] = {
          {.uuid = BLE_UUID16_DECLARE(0xFEF4),           // Define UUID for writing
           .flags = BLE_GATT_CHR_F_READ,
           .access_cb = device_read2},
-          {.uuid = BLE_UUID16_DECLARE(0xFEF4),           // Define UUID for writing
+          {.uuid = BLE_UUID16_DECLARE(0xFEF8),           // Define UUID for writing
           .flags = BLE_GATT_CHR_F_READ,
           .access_cb = device_read3},
          {0}}},
@@ -205,8 +204,8 @@ void bme680_read_data()
         }
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
-        vTaskDelay(1000);
         vTaskDelete(NULL);
+    
 
 
     }
@@ -252,20 +251,21 @@ void bht1750()
         ESP_LOGI(TAG, "BH1750 initialization successful");
         //Start reading data
         uint16_t data_light;
+        while(x<3){
         
-            while(x<3){
             bh1750_i2c_read_data(dev_1, &data_light);
             ESP_LOGI(TAG, "Light Intensity: %d Lux", data_light);
             lux = data_light;
-            
             x+=1;
-            vTaskDelay(1000);
-            }
+            
+            
+        }
     }
-    else{ 
+    else{
         ESP_LOGE(TAG, "BH1750 initialization failed!");
     }
     vTaskDelete(NULL);
+
 }
 
 void app_main()
@@ -282,13 +282,14 @@ void app_main()
     while (1) {
     i2c_driver_delete(0);
     ESP_ERROR_CHECK(i2cdev_init());
-     xTaskCreate(bme680_read_data, "bme680", 4096, NULL, 1,NULL);   // 6 - Run the thread
+    xTaskCreate(bme680_read_data, "bme680", 4096, NULL, 1,NULL);   // 6 - Run the thread
     vTaskDelay(1000);
-    //i2c_driver_delete(0);
-    //ESP_ERROR_CHECK(i2cdev_init());
+    i2c_driver_delete(0);
+    ESP_ERROR_CHECK(i2cdev_init());
 
     xTaskCreate(bht1750, "bme680", 4096, NULL, 1, NULL);
-    // 6 - Run the thread
+    vTaskDelay(1000);
+
     }
     
 }

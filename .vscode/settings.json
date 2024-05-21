@@ -39,7 +39,8 @@
         "queue.h": "c",
         "sdkconfig.h": "c",
         "ble_svc_gatt.h": "c",
-        "portmacro.h": "c"
+        "portmacro.h": "c",
+        "cstdint": "c"
     },
     "idf.flashType": "UART",
     "idf.portWin": "COM4"
